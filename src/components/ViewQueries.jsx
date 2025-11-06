@@ -10,14 +10,12 @@ const ViewQueries = ({ queries }) => {
     if (!selectedQuery) return;
     
     setLoading(true);
-    
+
     try {
-      const response = await fetch(`/api/query/${selectedQuery}`);
-      const data = await response.json().catch(() => null);
+      const response = await fetch(`http://localhost:8000/query/${selectedQuery}`);
+      const data = await response.json();
       
-      // Dummy results
-      const dummyResults = queries.find(q => q.id === selectedQuery)?.dummyData || [];
-      setResults(dummyResults);
+      setResults(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Query error:', error);
       setResults([]);
@@ -56,7 +54,7 @@ const ViewQueries = ({ queries }) => {
           {selectedQuery && (
             <div className="bg-muted/50 p-4 rounded-lg">
               <p className="text-sm font-mono text-muted-foreground">
-                {queries.find(q => q.id === selectedQuery)?.description}
+                {queries.find(q => q.id === selectedQuery)?.sql}
               </p>
             </div>
           )}

@@ -12,20 +12,29 @@ const InsertForm = ({ table, fields, onSubmit }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
-      await fetch(`/api/${table}/insert`, {
+      const response = await fetch(`http://localhost:8000/${table}/insert`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(formData),
       });
+
+      if (!response.ok) {
+        const error = await response.json();
+        alert(`Insert failed: ${error.detail || 'Unknown error'}`);
+        return;
+      }
+
+      alert('✅ Record inserted successfully');
       
-      alert('Inserted successfully (dummy)');
+      // Clear form
       setFormData(fields.reduce((acc, field) => ({ ...acc, [field.name]: '' }), {}));
       
-      if (onSubmit) onSubmit();
+      if (onSubmit) onSubmit(); // refresh view if required
     } catch (error) {
       console.error('Insert error:', error);
+      alert('❌ Error inserting record. Check backend.');
     }
   };
 
@@ -35,7 +44,7 @@ const InsertForm = ({ table, fields, onSubmit }) => {
         <PlusCircle className="h-6 w-6 text-primary" />
         <h3 className="text-xl font-bold text-foreground">Insert New Record</h3>
       </div>
-      
+
       <form onSubmit={handleSubmit} className="space-y-4">
         {fields.map(field => (
           <div key={field.name}>
@@ -43,7 +52,7 @@ const InsertForm = ({ table, fields, onSubmit }) => {
               {field.label}
               {field.required && <span className="text-destructive ml-1">*</span>}
             </label>
-            
+
             {field.type === 'select' ? (
               <select
                 name={field.name}
@@ -72,7 +81,7 @@ const InsertForm = ({ table, fields, onSubmit }) => {
             )}
           </div>
         ))}
-        
+
         <button
           type="submit"
           className="w-full bg-primary text-primary-foreground py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors shadow-md"

@@ -1,22 +1,27 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import TableView from '../components/TableView';
 import { Users, UserCheck, CreditCard, Car } from 'lucide-react';
 
 const Home = () => {
   const navigate = useNavigate();
-  
-  // Dummy person data
-  const personData = [
-    { personid: 1, name: 'John Doe', role: 'Employee', contact: 'john@example.com', biometric_data: 'FP001' },
-    { personid: 2, name: 'Jane Smith', role: 'Visitor', contact: 'jane@example.com', biometric_data: 'FP002' },
-    { personid: 3, name: 'Bob Johnson', role: 'Employee', contact: 'bob@example.com', biometric_data: 'FP003' },
-    { personid: 4, name: 'Alice Brown', role: 'Contractor', contact: 'alice@example.com', biometric_data: 'FP004' },
-    { personid: 5, name: 'Charlie Davis', role: 'Employee', contact: 'charlie@example.com', biometric_data: 'FP005' },
-  ];
-  
+
+  const [personData, setPersonData] = useState([]);
   const personColumns = ['personid', 'name', 'role', 'contact', 'biometric_data'];
-  
+
+  // Fetch data on component mount
+  useEffect(() => {
+    axios.get("http://localhost:8000/person/all")
+      .then(response => {
+        // Assuming backend returns: { users: [...] }
+        setPersonData(Array.isArray(response.data) ? response.data : []);
+      })
+      .catch(error => {
+        console.error("Error fetching person data:", error);
+      });
+  }, []);
+
   const tables = [
     { name: 'Person', path: '/table/person', icon: Users, color: 'text-blue-600' },
     { name: 'Visitor', path: '/table/visitor', icon: UserCheck, color: 'text-green-600' },
@@ -31,7 +36,7 @@ const Home = () => {
           <h1 className="text-4xl font-bold text-foreground mb-2">Database Management System</h1>
           <p className="text-muted-foreground">Manage and view all database records</p>
         </div>
-        
+
         <div className="mb-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {tables.map(table => (
             <button
@@ -47,7 +52,7 @@ const Home = () => {
             </button>
           ))}
         </div>
-        
+
         <TableView 
           data={personData}
           columns={personColumns}
